@@ -32,6 +32,10 @@ class AdamW(Optimizer):
             loss = closure()
 
         for group in self.param_groups:
+            b1, b2 = group['betas']
+            eps = group['eps']
+            weight_decay = group['weight_decay']
+
             for p in group["params"]:
                 if p.grad is None:
                     continue
@@ -60,7 +64,31 @@ class AdamW(Optimizer):
                 # Refer to the default project handout for more details.
 
                 ### TODO
-                raise NotImplementedError
+                # raise NotImplementedError
 
+                m = state['m'] if 'm' in state else torch.zeros(*grad.shape, dtype=torch.float32, device=grad.device)
+                v = state['v'] if 'v' in state else torch.zeros(*grad.shape, dtype=torch.float32, device=grad.device)
+                t = state['t'] if 't' in state else 0
+                t += 1
+
+                m = b1 * m + (1 - b1) * grad
+                v = b2 * v + (1 - b2) * (grad * grad)
+
+                # mt = m / (1 - b1 ** t)
+                # vt = v / (1 - b2 ** t)
+
+                # p_new = p.data - alpha * mt / (torch.sqrt(vt) + group['eps'])
+                # p.data = p_new - alpha * group['weight_decay'] * p.data
+
+                alpha_t = alpha * (1 - b2**t)**0.5 / (1 - b1**t)
+
+                p_new = p.data - alpha_t * m / (v**0.5 + eps)
+                p.data = p_new - alpha * weight_decay * p.data
+
+                self.state[p]['m'] = m
+                self.state[p]['v'] = v
+                self.state[p]['t'] = t
+                # print(self.state)
+                # print(group)
 
         return loss

@@ -66,7 +66,7 @@ class BertSelfAttention(nn.Module):
     # print(f"F.softmax(masked_x, dim=-1): {F.softmax(masked_x, dim=-1)}")
     attention = self.dropout(F.softmax(masked_x, dim=-1)) @ value # [bs, num_attention_heads, seq_len, attention_head_size]
 
-    # # [bs, seq_len, num_attention_heads, attention_head_size]
+    # [bs, seq_len, num_attention_heads, attention_head_size]
     return attention.transpose(1, 2).reshape(bs, seq_len, -1)
 
   def forward(self, hidden_states, attention_mask):
@@ -231,8 +231,8 @@ class BertModel(BertPreTrainedModel):
     sequence_output = self.encode(embedding_output, attention_mask=attention_mask)
 
     # Get cls token hidden state.
-    first_tk = sequence_output[:, 0]
-    first_tk = self.pooler_dense(first_tk)
+    first_tk = sequence_output[:, 0] # [bs, hidden]
+    first_tk = self.pooler_dense(first_tk) # [bs, hidden]
     first_tk = self.pooler_af(first_tk)
 
     return {'last_hidden_state': sequence_output, 'pooler_output': first_tk}
