@@ -59,7 +59,7 @@ class BertSelfAttention(nn.Module):
     x = query @ key.transpose(2, 3) / self.attention_head_size**0.5 
     # [bs, num_attention_heads, seq_len, seq_len]
     
-    print(f"attention_mask.shape: {attention_mask.shape}")
+    # print(f"attention_mask.shape: {attention_mask.shape}")
     masked_x = x.masked_fill(attention_mask != 0, float('-inf'))
     # print(f"x: {x}")
     # print(f"masked_x: {masked_x}")
@@ -78,7 +78,7 @@ class BertSelfAttention(nn.Module):
     # First, we have to generate the key, value, query for each token for multi-head attention
     # using self.transform (more details inside the function).
     # Size of *_layer is [bs, num_attention_heads, seq_len, attention_head_size].
-    print(f"hidden_states: {hidden_states.shape}")
+    # print(f"hidden_states: {hidden_states.shape}")
     key_layer = self.transform(hidden_states, self.key)
     value_layer = self.transform(hidden_states, self.value)
     query_layer = self.transform(hidden_states, self.query)
